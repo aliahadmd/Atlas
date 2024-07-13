@@ -1,3 +1,5 @@
+<!-- risk_management/ai_analysis_detail.html -->
+
 {% extends 'risk_management/base.html' %}
 {% load risk_management_extras %}
 
@@ -23,6 +25,7 @@
                         <p class="italic text-base-content text-opacity-60">No {{ section_title|lower }} provided in AI response.</p>
                     {% endif %}
                 {% endwith %}
+                <div class="divider"></div>
             {% endfor %}
         </div>
     </div>

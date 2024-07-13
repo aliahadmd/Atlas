@@ -167,6 +167,7 @@ def trigger_ai_analysis(request, risk_assessment_id):
         5. Key performance indicators (KPIs) to monitor this risk
 
         Format your response with clear section headers for each part of the analysis.
+        Use markdown formatting for better readability.
         """
         
         response = model.generate_content(prompt)
