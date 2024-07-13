@@ -34,7 +34,7 @@ class RiskAssessment(models.Model):
     risk = models.ForeignKey(Risk, on_delete=models.CASCADE)
     assessor = models.ForeignKey(User, on_delete=models.CASCADE)
     assessment_date = models.DateTimeField(auto_now_add=True)
-    ai_analysis = models.TextField()
+    ai_analysis = models.TextField(blank=True, null=True)
     mitigation_strategy = models.TextField()
     
     def __str__(self):
@@ -55,7 +55,10 @@ class AIAnalysis(models.Model):
     analysis_date = models.DateTimeField(auto_now_add=True)
     gemini_response = models.TextField()
     risk_score = models.FloatField()
+    analysis = models.TextField()  # Changed from detailed_analysis
     recommendations = models.TextField()
+    scenarios = models.TextField()  # Changed from potential_scenarios
+    key_indicators = models.TextField()  # Changed from kpis
     
     def __str__(self):
         return f"AI Analysis for {self.risk_assessment}"

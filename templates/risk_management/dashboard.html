@@ -1,0 +1,64 @@
+{% extends 'risk_management/base.html' %}
+
+{% block title %}Dashboard - Risk Management System{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">Dashboard</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Recent Risk Assessments</h2>
+            <ul class="menu bg-base-100 w-full">
+                {% for assessment in recent_assessments %}
+                <li>
+                    <a href="{% url 'risk_detail' assessment.risk.id %}">
+                        {{ assessment.risk.name }} - {{ assessment.assessment_date|date:"M d, Y" }}
+                    </a>
+                </li>
+                {% empty %}
+                <li>No recent assessments.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Assets Overview</h2>
+            <ul class="menu bg-base-100 w-full">
+                {% for asset in assets %}
+                <li>
+                    <a href="{% url 'asset_detail' asset.id %}">
+                        {{ asset.name }} - {{ asset.asset_type }}
+                    </a>
+                </li>
+                {% empty %}
+                <li>No assets found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="mt-12">
+    <h2 class="text-3xl font-bold mb-6">All Risks</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for risk in risks %}
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h3 class="card-title">{{ risk.name }}</h3>
+                <p>Type: {{ risk.get_risk_type_display }}</p>
+                <p>Probability: {{ risk.probability }}</p>
+                <p>Impact: {{ risk.impact }}</p>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'risk_detail' risk.id %}" class="btn btn-neutral">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-lg">No risks found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

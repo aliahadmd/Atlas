@@ -1,0 +1,43 @@
+<!-- base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Risk Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="min-h-screen flex flex-col">
+    {% if messages %}
+    <div class="toast toast-top toast-end">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% endif %}">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <nav class="navbar bg-neutral text-neutral-content">
+        <div class="navbar-start">
+            <a href="{% url 'dashboard' %}" class="btn btn-ghost text-xl">Risk Management</a>
+        </div>
+        <div class="navbar-end">
+            <a href="{% url 'asset_list' %}" class="btn btn-ghost">Assets</a>
+            <a href="{% url 'risk_list' %}" class="btn btn-ghost">Risks</a>
+            <a href="{% url 'risk_assessment_create' %}" class="btn btn-ghost">New Assessment</a>
+            <a href="{% url 'monitoring_create' %}" class="btn btn-ghost">Monitoring</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4 flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+        <p>&copy; 2024 Risk Management System</p>
+    </footer>
+</body>
+</html>

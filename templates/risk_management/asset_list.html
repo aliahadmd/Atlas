@@ -1,0 +1,31 @@
+<!-- asset_list.html -->
+{% extends 'risk_management/base.html' %}
+
+{% block title %}Assets - Risk Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-4xl font-bold mb-8">Assets</h1>
+
+    <a href="{% url 'asset_create' %}" class="btn btn-neutral mb-6">Add New Asset</a>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for asset in assets %}
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">{{ asset.name }}</h2>
+                <p>Type: {{ asset.asset_type }}</p>
+                <p>Value: ${{ asset.value }}</p>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'asset_detail' asset.id %}" class="btn btn-ghost">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full">
+            <p class="text-lg text-center">No assets found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

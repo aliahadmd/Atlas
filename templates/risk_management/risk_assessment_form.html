@@ -1,0 +1,43 @@
+{% extends 'risk_management/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}New Risk Assessment - Risk Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">New Risk Assessment</h1>
+    
+    <form method="post" class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+        <div class="card-body">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-control">
+                    <label for="{{ field.id_for_label }}" class="label">
+                        <span class="label-text">{{ field.label }}</span>
+                    </label>
+                    {% if field.field.widget.input_type == 'select' %}
+                        {% render_field field class="select select-bordered w-full" %}
+                    {% elif field.field.widget.input_type == 'textarea' %}
+                        {% render_field field class="textarea textarea-bordered h-24" %}
+                    {% else %}
+                        {% render_field field class="input input-bordered w-full" %}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <label class="label">
+                            <span class="label-text-alt">{{ field.help_text }}</span>
+                        </label>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ error }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="form-control mt-6">
+                <button type="submit" class="btn btn-neutral">Submit Assessment</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

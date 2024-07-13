@@ -1,0 +1,50 @@
+<!-- risk_detail.html -->
+{% extends 'risk_management/base.html' %}
+
+{% block title %}{{ risk.name }} - Risk Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-4xl font-bold mb-8">{{ risk.name }}</h1>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <p><strong>Type:</strong> {{ risk.get_risk_type_display }}</p>
+            <p><strong>Probability:</strong> {{ risk.probability }}</p>
+            <p><strong>Impact:</strong> {{ risk.impact }}</p>
+            <p class="mt-4"><strong>Description:</strong> {{ risk.description }}</p>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4">Associated Assets</h2>
+            <ul class="menu bg-base-100 w-full p-2 rounded-box">
+                {% for asset in risk.assets.all %}
+                <li>
+                    <a href="{% url 'asset_detail' asset.id %}">
+                        {{ asset.name }} - {{ asset.asset_type }}
+                    </a>
+                </li>
+                {% empty %}
+                <li>No associated assets.</li>
+                {% endfor %}
+            </ul>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4">Recent Assessments</h2>
+            <ul class="menu bg-base-100 w-full p-2 rounded-box">
+                {% for assessment in risk.riskassessment_set.all|slice:":5" %}
+                <li>
+                    <div class="flex justify-between items-center w-full">
+                        <span>{{ assessment.assessment_date|date:"M d, Y" }} by {{ assessment.assessor.username }}</span>
+                        {% if assessment.ai_analysis %}
+                        <a href="{% url 'ai_analysis_detail' assessment.aianalysis.pk %}" class="btn btn-ghost btn-sm">View AI Analysis</a>
+                        {% else %}
+                        <a href="{% url 'trigger_ai_analysis' assessment.pk %}" class="btn btn-neutral btn-sm">Trigger AI Analysis</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% empty %}
+                <li>No assessments yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
