@@ -11,7 +11,7 @@
         <div class="card-body">
             {% csrf_token %}
             {% for field in form %}
-                <div class="form-control">
+                {% if field.name != 'ai_analysis' %} <div class="form-control">
                     <label for="{{ field.id_for_label }}" class="label">
                         <span class="label-text">{{ field.label }}</span>
                     </label>
@@ -33,6 +33,7 @@
                         </label>
                     {% endfor %}
                 </div>
+                {% endif %}
             {% endfor %}
             <div class="form-control mt-6">
                 <button type="submit" class="btn btn-neutral">Submit Assessment</button>
@@ -41,3 +42,4 @@
     </form>
 </div>
 {% endblock %}
+
