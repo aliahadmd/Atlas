@@ -1,4 +1,4 @@
-{% extends "portfolio_management/base.html" %}
+{% extends 'base/base.html' %}
 
 {% block title %}{{ portfolio.name }} Details{% endblock %}
 
@@ -95,7 +95,8 @@
     </div>
 </div>
 
-<div class="flex justify-between"><a href="{% url 'associate_risk_with_portfolio' portfolio.id %}" class="btn btn-primary">Associate Risk</a>
+<div class="flex justify-between">
+    <a href="{% url 'portfolio_management:associate_risk_with_portfolio' portfolio.id %}" class="btn btn-primary">Associate Risk</a>
     <a href="{% url 'portfolio_management:portfolio_update' portfolio.id %}" class="btn btn-neutral">Edit Portfolio</a>
     <a href="{% url 'portfolio_management:portfolio_delete' portfolio.id %}" class="btn btn-error">Delete Portfolio</a>
 </div>
