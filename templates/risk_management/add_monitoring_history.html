@@ -1,0 +1,34 @@
+{% extends 'risk_management/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add Monitoring History - Risk Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Add Monitoring History</h1>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Monitoring: {{ monitoring.risk.name }}</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">New Status</span>
+                    </label>
+                    {% render_field form.new_status class="select select-bordered w-full" %}
+                </div>
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">Change Reason</span>
+                    </label>
+                    {% render_field form.change_reason class="textarea textarea-bordered h-24" %}
+                </div>
+                <div class="form-control mt-6">
+                    <button type="submit" class="btn btn-primary">Add History</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
