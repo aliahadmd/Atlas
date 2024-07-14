@@ -25,4 +25,7 @@ urlpatterns = [
     path('monitoring/create/', views.MonitoringCreateView.as_view(), name='monitoring_create'),
     path('monitoring/<int:pk>/update/', views.MonitoringUpdateView.as_view(), name='monitoring_update'),
     path('monitoring/<int:pk>/history/add/', views.add_monitoring_history, name='add_monitoring_history'),
+
+    path('risk-heatmap/', views.RiskHeatmapView.as_view(), name='risk_heatmap'),
+    path('risk-data-json/', views.risk_data_json, name='risk_data_json'),
 ]

@@ -12,6 +12,8 @@ import logging
 from django.contrib import messages
 import re
 from django.db.models import Count, Avg
+from django.views.generic import TemplateView
+from django.http import JsonResponse
 
 
 # Configure logging
@@ -296,5 +298,41 @@ def add_monitoring_history(request, pk):
         form = MonitoringHistoryForm()
     
     return render(request, 'risk_management/add_monitoring_history.html', {'form': form, 'monitoring': monitoring})
+
+
+
+
+class RiskHeatmapView(TemplateView):
+    template_name = 'risk_management/risk_heatmap.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        risks = Risk.objects.all()
+        risk_data = [
+            {
+                'id': risk.id,
+                'name': risk.name,
+                'probability': risk.probability,
+                'impact': risk.impact,
+                'risk_type': risk.get_risk_type_display()
+            }
+            for risk in risks
+        ]
+        context['risk_data'] = risk_data
+        return context
+
+def risk_data_json(request):
+    risks = Risk.objects.all()
+    risk_data = [
+        {
+            'id': risk.id,
+            'name': risk.name,
+            'probability': risk.probability,
+            'impact': risk.impact,
+            'risk_type': risk.get_risk_type_display()
+        }
+        for risk in risks
+    ]
+    return JsonResponse(risk_data, safe=False)
 
 
