@@ -40,15 +40,6 @@ class RiskAssessment(models.Model):
     def __str__(self):
         return f"Assessment of {self.risk.name} by {self.assessor.username}"
 
-class Monitoring(models.Model):
-    risk = models.ForeignKey(Risk, on_delete=models.CASCADE)
-    monitor = models.ForeignKey(User, on_delete=models.CASCADE)
-    monitoring_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50)
-    notes = models.TextField()
-    
-    def __str__(self):
-        return f"Monitoring of {self.risk.name} on {self.monitoring_date}"
 
 class AIAnalysis(models.Model):
     risk_assessment = models.OneToOneField(RiskAssessment, on_delete=models.CASCADE)
@@ -62,3 +53,34 @@ class AIAnalysis(models.Model):
     
     def __str__(self):
         return f"AI Analysis for {self.risk_assessment}"
+
+class Monitoring(models.Model):
+    STATUS_CHOICES = [
+        ('ON_TRACK', 'On Track'),
+        ('AT_RISK', 'At Risk'),
+        ('OFF_TRACK', 'Off Track'),
+        ('COMPLETED', 'Completed'),
+    ]
+
+    risk = models.ForeignKey(Risk, on_delete=models.CASCADE, related_name='monitoring_entries')
+    monitor = models.ForeignKey(User, on_delete=models.CASCADE)
+    monitoring_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    notes = models.TextField()
+    key_indicators = models.JSONField(default=dict, blank=True) 
+    next_review_date = models.DateField()
+    
+    def __str__(self):
+        return f"Monitoring of {self.risk.name} on {self.monitoring_date}"
+    
+
+class MonitoringHistory(models.Model):
+    monitoring = models.ForeignKey(Monitoring, on_delete=models.CASCADE, related_name='history')
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_date = models.DateTimeField(auto_now_add=True)
+    old_status = models.CharField(max_length=20, choices=Monitoring.STATUS_CHOICES)
+    new_status = models.CharField(max_length=20, choices=Monitoring.STATUS_CHOICES)
+    change_reason = models.TextField()
+
+    def __str__(self):
+        return f"Status change for {self.monitoring} on {self.changed_date}"

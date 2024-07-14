@@ -1,0 +1,67 @@
+{% extends 'risk_management/base.html' %}
+{% load risk_management_extras %}
+
+{% block title %}Monitoring Detail - {{ monitoring.risk.name }} - Risk Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Monitoring Detail: {{ monitoring.risk.name }}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">Current Status</h2>
+                <p><strong>Status:</strong> <span class="badge {% if monitoring.status == 'ON_TRACK' %}badge-success{% elif monitoring.status == 'AT_RISK' %}badge-warning{% elif monitoring.status == 'OFF_TRACK' %}badge-error{% else %}badge-info{% endif %}">{{ monitoring.get_status_display }}</span></p>
+                <p><strong>Last Updated:</strong> {{ monitoring.monitoring_date|date:"M d, Y H:i" }}</p>
+                <p><strong>Next Review:</strong> {{ monitoring.next_review_date|date:"M d, Y" }}</p>
+                <p><strong>Monitor:</strong> {{ monitoring.monitor.get_full_name }}</p>
+                <div class="mt-4">
+                    <h3 class="font-bold">Notes:</h3>
+                    <p>{{ monitoring.notes|markdown_to_html }}</p>
+                </div>
+                <div class="mt-4">
+                    <h3 class="font-bold">Key Indicators:</h3>
+                    <ul>
+                        {% for key, value in monitoring.key_indicators.items %}
+                        <li><strong>{{ key }}:</strong> {{ value }}</li>
+                        {% empty %}
+                        <li>No key indicators recorded.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">Monitoring History</h2>
+                <ul class="timeline">
+                    {% for history in history %}
+                    <li>
+                        <div class="timeline-start">{{ history.changed_date|date:"M d, Y H:i" }}</div>
+                        <div class="timeline-middle">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="timeline-end timeline-box">
+                            <p><strong>Status changed:</strong> {{ history.old_status }} → {{ history.new_status }}</p>
+                            <p><strong>Changed by:</strong> {{ history.changed_by.get_full_name }}</p>
+                            <p><strong>Reason:</strong> {{ history.change_reason }}</p>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li>No history recorded.</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4">
+                    <a href="{% url 'add_monitoring_history' monitoring.id %}" class="btn btn-primary">Add Status Update</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <a href="{% url 'monitoring_update' monitoring.id %}" class="btn btn-warning">Update Monitoring</a>
+        <a href="{% url 'monitoring_list' %}" class="btn btn-neutral">Back to List</a>
+    </div>
+</div>
+{% endblock %}

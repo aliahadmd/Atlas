@@ -19,4 +19,10 @@ urlpatterns = [
     
     path('ai-analysis/<int:pk>/', views.AIAnalysisDetailView.as_view(), name='ai_analysis_detail'),
     path('trigger-ai-analysis/<int:risk_assessment_id>/', views.trigger_ai_analysis, name='trigger_ai_analysis'),
+
+    path('monitoring/', views.MonitoringListView.as_view(), name='monitoring_list'),
+    path('monitoring/<int:pk>/', views.MonitoringDetailView.as_view(), name='monitoring_detail'),
+    path('monitoring/create/', views.MonitoringCreateView.as_view(), name='monitoring_create'),
+    path('monitoring/<int:pk>/update/', views.MonitoringUpdateView.as_view(), name='monitoring_update'),
+    path('monitoring/<int:pk>/history/add/', views.add_monitoring_history, name='add_monitoring_history'),
 ]

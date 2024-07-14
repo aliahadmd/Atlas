@@ -4,8 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from .models import Asset, Risk, RiskAssessment, Monitoring, AIAnalysis
-from .forms import AssetForm, RiskForm, RiskAssessmentForm, MonitoringForm
+from .models import Asset, MonitoringHistory, Risk, RiskAssessment, Monitoring, AIAnalysis
+from .forms import AssetForm, MonitoringHistoryForm, RiskForm, RiskAssessmentForm, MonitoringForm
 import google.generativeai as genai
 from django.conf import settings
 import logging
@@ -67,15 +67,7 @@ class RiskAssessmentCreateView(LoginRequiredMixin, CreateView):
         form.instance.assessor = self.request.user
         return super().form_valid(form)
 
-class MonitoringCreateView(LoginRequiredMixin, CreateView):
-    model = Monitoring
-    form_class = MonitoringForm
-    template_name = 'risk_management/monitoring_form.html'
-    success_url = reverse_lazy('dashboard')
 
-    def form_valid(self, form):
-        form.instance.monitor = self.request.user
-        return super().form_valid(form)
 
 class AIAnalysisDetailView(LoginRequiredMixin, DetailView):
     model = AIAnalysis
@@ -218,3 +210,73 @@ def trigger_ai_analysis(request, risk_assessment_id):
         messages.error(request, "An unexpected error occurred during AI analysis. Please try again later.")
     
     return redirect('dashboard')
+
+
+
+
+class MonitoringListView(LoginRequiredMixin, ListView):
+    model = Monitoring
+    template_name = 'risk_management/monitoring_list.html'
+    context_object_name = 'monitoring_entries'
+
+class MonitoringDetailView(LoginRequiredMixin, DetailView):
+    model = Monitoring
+    template_name = 'risk_management/monitoring_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['history'] = self.object.history.all().order_by('-changed_date')
+        return context
+
+class MonitoringCreateView(LoginRequiredMixin, CreateView):
+    model = Monitoring
+    form_class = MonitoringForm
+    template_name = 'risk_management/monitoring_form.html'
+    success_url = reverse_lazy('monitoring_list')
+
+    def form_valid(self, form):
+        form.instance.monitor = self.request.user
+        return super().form_valid(form)
+
+class MonitoringUpdateView(LoginRequiredMixin, UpdateView):
+    model = Monitoring
+    form_class = MonitoringForm
+    template_name = 'risk_management/monitoring_form.html'
+    success_url = reverse_lazy('monitoring_list')
+
+    def form_valid(self, form):
+        old_status = self.get_object().status
+        response = super().form_valid(form)
+        new_status = form.instance.status
+
+        if old_status != new_status:
+            MonitoringHistory.objects.create(
+                monitoring=self.object,
+                changed_by=self.request.user,
+                old_status=old_status,
+                new_status=new_status,
+                change_reason="Status updated"
+            )
+
+        return response
+
+def add_monitoring_history(request, pk):
+    monitoring = get_object_or_404(Monitoring, pk=pk)
+    if request.method == 'POST':
+        form = MonitoringHistoryForm(request.POST)
+        if form.is_valid():
+            history = form.save(commit=False)
+            history.monitoring = monitoring
+            history.changed_by = request.user
+            history.old_status = monitoring.status
+            history.save()
+            
+            monitoring.status = history.new_status
+            monitoring.save()
+            
+            messages.success(request, "Monitoring history added successfully.")
+            return redirect('monitoring_detail', pk=pk)
+    else:
+        form = MonitoringHistoryForm()
+    
+    return render(request, 'risk_management/add_monitoring_history.html', {'form': form, 'monitoring': monitoring})

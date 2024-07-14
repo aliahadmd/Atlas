@@ -7,37 +7,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Risk Management System{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="min-h-screen flex flex-col">
-    {% if messages %}
-    <div class="toast toast-top toast-end">
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% endif %}">
-            <span>{{ message }}</span>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <nav class="navbar bg-neutral text-neutral-content">
-        <div class="navbar-start">
+<body class="flex h-screen bg-gray-100">
+    <!-- Vertical Navigation -->
+    <nav class="w-64 bg-neutral text-neutral-content flex flex-col">
+        <div class="p-4">
             <a href="{% url 'dashboard' %}" class="btn btn-ghost text-xl">Risk Management</a>
         </div>
-        <div class="navbar-end">
-            <a href="{% url 'asset_list' %}" class="btn btn-ghost">Assets</a>
-            <a href="{% url 'risk_list' %}" class="btn btn-ghost">Risks</a>
-            <a href="{% url 'risk_assessment_create' %}" class="btn btn-ghost">New Assessment</a>
-            <a href="{% url 'monitoring_create' %}" class="btn btn-ghost">Monitoring</a>
+        <ul class="menu p-4 flex-grow">
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'asset_list' %}">Assets</a></li>
+            <li><a href="{% url 'risk_list' %}">Risks</a></li>
+            <li><a href="{% url 'risk_assessment_create' %}">New Assessment</a></li>
+            <li><a href="{% url 'monitoring_list' %}">Monitoring</a></li>
+            <li><a href="{% url 'monitoring_create' %}">New Monitoring</a></li>
+        </ul>
+        <div class="p-4">
+            <!-- Add logout button or user info here -->
+            <a href="#" class="btn btn-outline btn-sm">Logout</a>
         </div>
     </nav>
 
-    <main class="container mx-auto mt-8 p-4 flex-grow">
-        {% block content %}
-        {% endblock %}
-    </main>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top bar for messages -->
+        {% if messages %}
+        <div class="bg-base-200 p-4">
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% endif %} mb-2">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    <footer class="footer footer-center p-4 bg-base-300 text-base-content">
-        <p>&copy; 2024 Risk Management System</p>
-    </footer>
+        <!-- Main content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+            <div class="container mx-auto px-6 py-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-neutral text-neutral-content p-4 text-center">
+            <p>&copy; 2024 Risk Management System</p>
+        </footer>
+    </div>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
