@@ -1,60 +1,76 @@
-<!-- base.html -->
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Risk Management System{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     {% block extra_css %}{% endblock %}
+    <style>
+        .menu li > *:not(ul):not(.menu-title):not(details):active,
+        .menu li > *:not(ul):not(.menu-title):not(details).active,
+        .menu li > details > summary:active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+    </style>
 </head>
-<body class="flex h-screen bg-gray-100">
-    <!-- Vertical Navigation -->
-    <nav class="w-64 bg-neutral text-neutral-content flex flex-col">
-        <div class="p-4">
-            <a href="{% url 'dashboard' %}" class="btn btn-ghost text-xl">Risk Management</a>
-        </div>
-        <ul class="menu p-4 flex-grow">
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'asset_list' %}">Assets</a></li>
-            <li><a href="{% url 'risk_list' %}">Risks</a></li>
-            <li><a href="{% url 'risk_assessment_create' %}">New Assessment</a></li>
-            <li><a href="{% url 'monitoring_list' %}">Monitoring</a></li>
-            <li><a href="{% url 'monitoring_create' %}">New Monitoring</a></li>
-        </ul>
-        <div class="p-4">
-            <!-- Add logout button or user info here -->
-            <a href="#" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </nav>
-
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Top bar for messages -->
-        {% if messages %}
-        <div class="bg-base-200 p-4">
-            {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% endif %} mb-2">
-                {{ message }}
+<body class="drawer lg:drawer-open">
+    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+        <!-- Navbar -->
+        <div class="navbar bg-base-100 lg:hidden">
+            <div class="flex-none">
+                <label for="my-drawer" class="btn btn-square btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </label>
             </div>
-            {% endfor %}
+            <div class="flex-1">
+                <a href="{% url 'dashboard' %}" class="btn btn-ghost text-xl">Risk Management</a>
+            </div>
         </div>
-        {% endif %}
 
-        <!-- Main content -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-            <div class="container mx-auto px-6 py-8">
+        <!-- Page content -->
+        <main class="flex-1 overflow-y-auto bg-gray-100 p-4">
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% endif %} mb-2">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="container mx-auto">
                 {% block content %}{% endblock %}
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="bg-neutral text-neutral-content p-4 text-center">
+        <footer class="footer footer-center p-4 bg-base-300 text-base-content">
             <p>&copy; 2024 Risk Management System</p>
         </footer>
+    </div> 
+    <div class="drawer-side">
+        <label for="my-drawer" class="drawer-overlay"></label>
+        <aside class="bg-base-200 w-80 min-h-full">
+            <div class="p-4 text-xl font-bold">
+                <a href="{% url 'dashboard' %}">Risk Management</a>
+            </div>
+            <ul class="menu p-4">
+                <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                <li><a href="{% url 'asset_list' %}" class="{% if request.resolver_match.url_name == 'asset_list' %}active{% endif %}">Assets</a></li>
+                <li><a href="{% url 'risk_list' %}" class="{% if request.resolver_match.url_name == 'risk_list' %}active{% endif %}">Risks</a></li>
+                <li><a href="{% url 'risk_assessment_create' %}" class="{% if request.resolver_match.url_name == 'risk_assessment_create' %}active{% endif %}">New Assessment</a></li>
+                <li><a href="{% url 'monitoring_list' %}" class="{% if request.resolver_match.url_name == 'monitoring_list' %}active{% endif %}">Monitoring</a></li>
+                <li><a href="{% url 'monitoring_create' %}" class="{% if request.resolver_match.url_name == 'monitoring_create' %}active{% endif %}">New Monitoring</a></li>
+            </ul>
+            <div class="p-4 mt-auto">
+                <a href="#" class="btn btn-outline btn-sm w-full">Logout</a>
+            </div>
+        </aside>
     </div>
-
     {% block extra_js %}{% endblock %}
 </body>
 </html>
