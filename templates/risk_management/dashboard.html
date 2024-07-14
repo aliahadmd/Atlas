@@ -1,11 +1,15 @@
 {% extends 'risk_management/base.html' %}
+{% load static %}
 
-{% block title %}Dashboard - Risk Management System{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
-<h1 class="text-4xl font-bold mb-8">Dashboard</h1>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Dashboard</h1>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
             <h2 class="card-title">Recent Risk Assessments</h2>
@@ -41,6 +45,28 @@
     </div>
 </div>
 
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Risk Types Distribution</h2>
+            <canvas id="riskTypeChart"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Monitoring Status</h2>
+            <canvas id="monitoringStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+        <h2 class="card-title">Average Risk Impact</h2>
+        <div class="text-4xl font-bold text-center">{{ avg_impact }}</div>
+    </div>
+</div>
+
 <div class="mt-12">
     <h2 class="text-3xl font-bold mb-6">All Risks</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -61,4 +87,70 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Risk Types Chart
+    var ctx = document.getElementById('riskTypeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {{ risk_type_labels|safe }},
+            datasets: [{
+                data: {{ risk_type_data|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                title: {
+                    display: true,
+                    text: 'Risk Types Distribution'
+                }
+            }
+        }
+    });
+
+    // Monitoring Status Chart
+    var ctx = document.getElementById('monitoringStatusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ monitoring_status_labels|safe }},
+            datasets: [{
+                label: 'Number of Risks',
+                data: {{ monitoring_status_data|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.8)',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Monitoring Status'
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

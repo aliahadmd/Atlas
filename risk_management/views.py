@@ -11,12 +11,15 @@ from django.conf import settings
 import logging
 from django.contrib import messages
 import re
+from django.db.models import Count, Avg
 
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-class DashboardView(LoginRequiredMixin, ListView):
+
+
+class DashboardView(ListView):
     template_name = 'risk_management/dashboard.html'
     context_object_name = 'risks'
     model = Risk
@@ -25,6 +28,19 @@ class DashboardView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['assets'] = Asset.objects.all()
         context['recent_assessments'] = RiskAssessment.objects.order_by('-assessment_date')[:5]
+        
+        # Aggregate data for charts
+        risk_types = Risk.objects.values('risk_type').annotate(count=Count('id'))
+        context['risk_type_labels'] = [rt['risk_type'] for rt in risk_types]
+        context['risk_type_data'] = [rt['count'] for rt in risk_types]
+        
+        monitoring_status = Monitoring.objects.values('status').annotate(count=Count('id'))
+        context['monitoring_status_labels'] = [ms['status'] for ms in monitoring_status]
+        context['monitoring_status_data'] = [ms['count'] for ms in monitoring_status]
+        
+        avg_impact = Risk.objects.aggregate(Avg('impact'))['impact__avg']
+        context['avg_impact'] = round(avg_impact, 2) if avg_impact else 0
+        
         return context
 
 class AssetListView(LoginRequiredMixin, ListView):
@@ -280,3 +296,5 @@ def add_monitoring_history(request, pk):
         form = MonitoringHistoryForm()
     
     return render(request, 'risk_management/add_monitoring_history.html', {'form': form, 'monitoring': monitoring})
+
+
