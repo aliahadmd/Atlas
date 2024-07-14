@@ -1,0 +1,27 @@
+{% extends "portfolio_management/base.html" %}
+
+{% block title %}Confirm Delete Transaction{% endblock %}
+
+{% block content %}
+<div class="card bg-base-100 shadow-xl max-w-md mx-auto">
+    <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">Confirm Delete Transaction</h2>
+        <p class="mb-4">Are you sure you want to delete this transaction?</p>
+        <ul class="list-disc list-inside mb-4">
+            <li>Asset: {{ transaction.asset.name }}</li>
+            <li>Type: {{ transaction.get_transaction_type_display }}</li>
+            <li>Quantity: {{ transaction.quantity }}</li>
+            <li>Price: {{ transaction.price }}</li>
+            <li>Date: {{ transaction.transaction_date }}</li>
+        </ul>
+        <p class="mb-4 font-semibold">This action cannot be undone and may affect your portfolio's performance calculations.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="card-actions justify-end">
+                <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-error">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

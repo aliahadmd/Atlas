@@ -1,0 +1,51 @@
+{% extends "portfolio_management/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+{% if form.instance.pk %}Edit Asset{% else %}Add Asset{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-4">
+        {% if form.instance.pk %}Edit Asset{% else %}Add Asset to {{ portfolio.name }}{% endif %}
+    </h1>
+
+    <div class="card bg-base-100 shadow-xl">
+        <form method="post" class="card-body">
+            {% csrf_token %}
+
+            {% if not form.instance.pk %}
+            <div class="alert alert-info mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>If this asset already exists in the portfolio, its quantity will be updated and the average purchase price will be recalculated.</span>
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">{{ field.label }}</span>
+                </label>
+                {% render_field field class="input input-bordered" %}
+                {% if field.help_text %}
+                <label class="label">
+                    <span class="label-text-alt">{{ field.help_text }}</span>
+                </label>
+                {% endif %}
+                {% for error in field.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ error }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="card-actions justify-end mt-4">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

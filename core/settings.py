@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'environ',
     'widget_tweaks',
     'risk_management',
+    'portfolio_management',
 ]
 
 MIDDLEWARE = [

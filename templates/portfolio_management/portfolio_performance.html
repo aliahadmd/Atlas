@@ -1,0 +1,43 @@
+{% extends "portfolio_management/base.html" %}
+
+{% block title %}{{ portfolio.name }} Performance{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">{{ portfolio.name }} Performance</h1>
+
+<div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+        <h2 class="card-title">Performance History</h2>
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Total Value</th>
+                        <th>Daily Return</th>
+                        <th>Cumulative Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for performance in performances %}
+                        <tr>
+                            <td>{{ performance.date }}</td>
+                            <td>{{ performance.total_value }}</td>
+                            <td>{{ performance.daily_return }}%</td>
+                            <td>{{ performance.cumulative_return }}%</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No performance data available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-between">
+    <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-neutral">Back to Portfolio</a>
+</div>
+{% endblock %}

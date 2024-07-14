@@ -1,0 +1,100 @@
+{% extends "portfolio_management/base.html" %}
+{% load static %}
+{% load extras %}
+
+{% block title %}Portfolio List{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Your Portfolios</h1>
+
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Overall Performance</h2>
+        <canvas id="overallPerformanceChart" width="400" height="200"></canvas>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for portfolio in portfolios %}
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">{{ portfolio.name }}</h2>
+                <p>{{ portfolio.description|truncatewords:20 }}</p>
+                <div class="mt-4">
+                    <canvas id="assetDistributionChart-{{ portfolio.id }}" width="200" height="200"></canvas>
+                </div>
+                <div class="card-actions justify-end mt-4">
+                    <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>You don't have any portfolios yet.</p>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8">
+        <a href="{% url 'portfolio_management:portfolio_create' %}" class="btn btn-primary">Create New Portfolio</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+<script>
+    // Overall Performance Chart
+    const ctx = document.getElementById('overallPerformanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ performance_dates|safe }},
+            datasets: [{
+                label: 'Total Value',
+                data: {{ total_values|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Asset Distribution Charts for each portfolio
+    {% for portfolio in portfolios %}
+    const ctx{{ portfolio.id }} = document.getElementById('assetDistributionChart-{{ portfolio.id }}').getContext('2d');
+    new Chart(ctx{{ portfolio.id }}, {
+        type: 'pie',
+        data: {
+            labels: {{ portfolio.asset_names|safe }},
+            datasets: [{
+                data: {{ portfolio.asset_values|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+    {% endfor %}
+</script>
+{% endblock %}

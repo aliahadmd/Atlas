@@ -1,0 +1,40 @@
+{% extends "portfolio_management/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Transaction{% else %}Add Transaction{% endif %}
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">
+    {% if form.instance.pk %}Edit Transaction{% else %}Add Transaction to {{ portfolio.name }}{% endif %}
+</h1>
+
+<form method="post" class="card bg-base-100 shadow-xl">
+    {% csrf_token %}
+    <div class="card-body">
+        {% for field in form %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">{{ field.label }}</span>
+                </label>
+                {% render_field field class="input input-bordered" %}
+                {% if field.help_text %}
+                    <label class="label">
+                        <span class="label-text-alt">{{ field.help_text }}</span>
+                    </label>
+                {% endif %}
+                {% for error in field.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ error }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="card-actions justify-end mt-4">
+            <button type="submit" class="btn btn-neutral">Save</button>
+            <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-ghost">Cancel</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

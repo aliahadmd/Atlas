@@ -1,0 +1,20 @@
+{% extends "portfolio_management/base.html" %}
+
+{% block title %}Confirm Delete Portfolio{% endblock %}
+
+{% block content %}
+<div class="card bg-base-100 shadow-xl max-w-md mx-auto">
+    <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">Confirm Delete Portfolio</h2>
+        <p class="mb-4">Are you sure you want to delete the portfolio "{{ portfolio.name }}"?</p>
+        <p class="mb-4 font-semibold">This will delete all associated assets and transactions. This action cannot be undone.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="card-actions justify-end">
+                <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-error">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

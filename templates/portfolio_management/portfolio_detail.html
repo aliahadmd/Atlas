@@ -1,0 +1,102 @@
+{% extends "portfolio_management/base.html" %}
+
+{% block title %}{{ portfolio.name }} Details{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">{{ portfolio.name }}</h1>
+<p class="mb-4">{{ portfolio.description }}</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Portfolio Assets</h2>
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Quantity</th>
+                        <th>Purchase Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                        <tr>
+                            <td>{{ asset.asset.name }}</td>
+                            <td>{{ asset.quantity }}</td>
+                            <td>{{ asset.purchase_price }}</td>
+                            <td>
+                                <a href="{% url 'portfolio_management:portfolio_asset_update' portfolio.id asset.id %}" class="btn btn-xs btn-neutral">Edit</a>
+                                <a href="{% url 'portfolio_management:portfolio_asset_delete' portfolio.id asset.id %}" class="btn btn-xs btn-error">Delete</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No assets in this portfolio.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-actions justify-end mt-4">
+                <a href="{% url 'portfolio_management:portfolio_asset_add' portfolio.id %}" class="btn btn-neutral">Add Asset</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Recent Transactions</h2>
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.transaction_date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ transaction.asset.name }}</td>
+                            <td>{{ transaction.get_transaction_type_display }}</td>
+                            <td>{{ transaction.quantity }}</td>
+                            <td>{{ transaction.price }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No transactions for this portfolio.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-actions justify-end mt-4">
+                <a href="{% url 'portfolio_management:transaction_add' portfolio.id %}" class="btn btn-neutral">Add Transaction</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+        <h2 class="card-title">Portfolio Performance</h2>
+        {% if performance %}
+            <p>Total Value: {{ performance.total_value }}</p>
+            <p>Daily Return: {{ performance.daily_return }}%</p>
+            <p>Cumulative Return: {{ performance.cumulative_return }}%</p>
+        {% else %}
+            <p>No performance data available.</p>
+        {% endif %}
+        <div class="card-actions justify-end mt-4">
+            <a href="{% url 'portfolio_management:portfolio_performance' portfolio.id %}" class="btn btn-neutral">View Full Performance</a>
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-between"><a href="{% url 'associate_risk_with_portfolio' portfolio.id %}" class="btn btn-primary">Associate Risk</a>
+    <a href="{% url 'portfolio_management:portfolio_update' portfolio.id %}" class="btn btn-neutral">Edit Portfolio</a>
+    <a href="{% url 'portfolio_management:portfolio_delete' portfolio.id %}" class="btn btn-error">Delete Portfolio</a>
+</div>
+{% endblock %}

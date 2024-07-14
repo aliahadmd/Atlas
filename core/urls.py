@@ -6,7 +6,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('risk_management.urls'))
+    path('', include('risk_management.urls')),
+    path('pm/', include('portfolio_management.urls')),
 ]
 
 
