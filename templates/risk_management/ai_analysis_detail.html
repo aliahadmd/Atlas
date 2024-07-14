@@ -15,7 +15,7 @@
             <p class="mb-4"><strong>Risk Score:</strong> {{ object.risk_score }}</p>
             
             {% for section_title, field_name in sections %}
-                <h2 class="text-2xl font-bold mt-8 mb-4">{{ section_title }}</h2>
+                {% comment %} <h2 class="text-2xl font-bold mt-8 mb-4">{{ section_title }}</h2> {% endcomment %}
                 {% with section_content=object|getattribute:field_name %}
                     {% if section_content %}
                         <div class="prose max-w-none">
@@ -25,7 +25,7 @@
                         <p class="italic text-base-content text-opacity-60">No {{ section_title|lower }} provided in AI response.</p>
                     {% endif %}
                 {% endwith %}
-                <div class="divider"></div>
+                {% comment %} <div class="divider"></div> {% endcomment %}
             {% endfor %}
         </div>
     </div>
