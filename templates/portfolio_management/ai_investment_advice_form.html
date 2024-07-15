@@ -1,0 +1,97 @@
+{% extends 'base/base.html' %}
+
+{% block title %}AI Investment Advice for {{ portfolio.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">AI Investment Advice for {{ portfolio.name }}</h1>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Investment Preferences</h2>
+            <form method="post" action="{% url 'portfolio_management:ai_investment_advice' portfolio.id %}">
+                {% csrf_token %}
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Risk Tolerance</span>
+                    </label>
+                    <select name="risk_tolerance" class="select select-bordered w-full">
+                        <option value="low">Low - I prefer safer investments</option>
+                        <option value="medium">Medium - I can accept some risk</option>
+                        <option value="high">High - I'm comfortable with high-risk investments</option>
+                    </select>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Investment Horizon</span>
+                    </label>
+                    <select name="investment_horizon" class="select select-bordered w-full">
+                        <option value="short">Short-term (0-2 years)</option>
+                        <option value="medium">Medium-term (2-5 years)</option>
+                        <option value="long">Long-term (5+ years)</option>
+                    </select>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Investment Goals</span>
+                    </label>
+                    <textarea name="investment_goals" class="textarea textarea-bordered h-24" placeholder="e.g., Retirement, Buying a house, Children's education"></textarea>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Preferred Sectors</span>
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" name="sectors" value="technology" class="checkbox checkbox-primary" />
+                            <span class="label-text ml-2">Technology</span>
+                        </label>
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" name="sectors" value="healthcare" class="checkbox checkbox-primary" />
+                            <span class="label-text ml-2">Healthcare</span>
+                        </label>
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" name="sectors" value="finance" class="checkbox checkbox-primary" />
+                            <span class="label-text ml-2">Finance</span>
+                        </label>
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" name="sectors" value="energy" class="checkbox checkbox-primary" />
+                            <span class="label-text ml-2">Energy</span>
+                        </label>
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" name="sectors" value="real_estate" class="checkbox checkbox-primary" />
+                            <span class="label-text ml-2">Real Estate</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Monthly Investment Amount</span>
+                    </label>
+                    <input type="number" name="monthly_investment" class="input input-bordered" placeholder="Enter amount in dollars" />
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label cursor-pointer">
+                        <span class="label-text">Are you interested in ESG (Environmental, Social, and Governance) investments?</span>
+                        <input type="checkbox" name="esg_preference" class="toggle toggle-primary" />
+                    </label>
+                </div>
+
+                <div class="form-control mt-6">
+                    <button type="submit" class="btn btn-primary">Get AI Investment Advice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-neutral">Back to Portfolio</a>
+    </div>
+</div>
+{% endblock %}

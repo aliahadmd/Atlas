@@ -86,6 +86,7 @@
                         <a href="{% url 'portfolio_management:portfolio_create' %}"
                            class="{% if request.resolver_match.url_name == 'portfolio_create' %}active{% endif %}">Create Portfolio</a>
                     </li>
+                    
                     <li>
                         <a href="{% url 'risk_assessment_create' %}"
                            class="{% if request.resolver_match.url_name == 'risk_assessment_create' %}active{% endif %}">New Assessment</a>
@@ -102,6 +103,7 @@
                         <a href="{% url 'risk_heatmap' %}"
                            class="{% if request.resolver_match.url_name == 'risk_heatmap' %}active{% endif %}">Risk Heatmap</a>
                     </li>
+                    
                    
                 </ul>
                 <div class="p-4 mt-auto">

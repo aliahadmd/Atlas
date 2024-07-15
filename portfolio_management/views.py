@@ -10,6 +10,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 from risk_management.models import Risk
+from .gemini_ai import get_portfolio_insights, get_risk_assessment, get_market_trends, get_ai_investment_advice
 
 
 logger = logging.getLogger(__name__)
@@ -63,16 +64,31 @@ def portfolio_detail(request, portfolio_id):
     assets = portfolio.portfolio_assets.all()
     transactions = portfolio.transactions.order_by("-transaction_date")[:10]
     performance = portfolio.performances.order_by("-date").first()
-
-    # Add this section to fetch associated risks
     risks = Risk.objects.filter(portfolios=portfolio)
+
+    # Generate AI insights
+    portfolio_data = {
+        'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in assets],
+        'total_value': sum(asset.quantity * asset.asset.value for asset in assets),
+        'performance': {'date': performance.date, 'total_value': performance.total_value, 'daily_return': performance.daily_return, 'cumulative_return': performance.cumulative_return} if performance else None
+    }
+    ai_insights = get_portfolio_insights(portfolio_data)
+    
+    risk_data = [{'name': risk.name, 'risk_type': risk.risk_type, 'description': risk.description} for risk in risks]
+    ai_risk_assessment = get_risk_assessment(risk_data)
+
+    asset_names = [asset.asset.name for asset in assets]
+    ai_market_trends = get_market_trends(asset_names)
 
     context = {
         "portfolio": portfolio,
         "assets": assets,
         "transactions": transactions,
         "performance": performance,
-        "risks": risks,  # Add this line
+        "risks": risks,
+        "ai_insights": ai_insights,
+        "ai_risk_assessment": ai_risk_assessment,
+        "ai_market_trends": ai_market_trends,
     }
     return render(request, "portfolio_management/portfolio_detail.html", context)
 
@@ -400,3 +416,39 @@ def associate_risk_with_portfolio(request, portfolio_id):
         'available_risks': available_risks,
     }
     return render(request, 'portfolio_management/associate_risk.html', context)
+
+
+
+
+
+@login_required
+def ai_investment_advice(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id, owner=request.user)
+    
+    if request.method == 'POST':
+        # Process form data
+        user_preferences = {
+            'risk_tolerance': request.POST.get('risk_tolerance'),
+            'investment_horizon': request.POST.get('investment_horizon'),
+            'investment_goals': request.POST.get('investment_goals'),
+            'preferred_sectors': request.POST.getlist('sectors'),
+            'monthly_investment': request.POST.get('monthly_investment'),
+            'esg_preference': request.POST.get('esg_preference') == 'on'
+        }
+        
+        portfolio_data = {
+            'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in portfolio.portfolio_assets.all()],
+            'total_value': sum(asset.quantity * asset.asset.value for asset in portfolio.portfolio_assets.all()),
+        }
+        
+        ai_advice = get_ai_investment_advice(user_preferences, portfolio_data)
+        
+        context = {
+            'portfolio': portfolio,
+            'ai_advice': ai_advice,
+            'user_preferences': user_preferences
+        }
+        return render(request, 'portfolio_management/ai_investment_advice_result.html', context)
+    
+    # If GET request, show the form
+    return render(request, 'portfolio_management/ai_investment_advice_form.html', {'portfolio': portfolio})
