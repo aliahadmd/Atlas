@@ -67,3 +67,5 @@ def get_ai_investment_advice(user_preferences, portfolio_data):
     
     response = model.generate_content(prompt)
     return response.text
+
+

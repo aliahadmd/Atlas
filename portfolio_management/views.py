@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal
 from risk_management.models import Risk
 from .gemini_ai import get_portfolio_insights, get_risk_assessment, get_market_trends, get_ai_investment_advice
+from django.http import JsonResponse
+
 
 
 logger = logging.getLogger(__name__)
@@ -66,29 +68,12 @@ def portfolio_detail(request, portfolio_id):
     performance = portfolio.performances.order_by("-date").first()
     risks = Risk.objects.filter(portfolios=portfolio)
 
-    # Generate AI insights
-    portfolio_data = {
-        'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in assets],
-        'total_value': sum(asset.quantity * asset.asset.value for asset in assets),
-        'performance': {'date': performance.date, 'total_value': performance.total_value, 'daily_return': performance.daily_return, 'cumulative_return': performance.cumulative_return} if performance else None
-    }
-    ai_insights = get_portfolio_insights(portfolio_data)
-    
-    risk_data = [{'name': risk.name, 'risk_type': risk.risk_type, 'description': risk.description} for risk in risks]
-    ai_risk_assessment = get_risk_assessment(risk_data)
-
-    asset_names = [asset.asset.name for asset in assets]
-    ai_market_trends = get_market_trends(asset_names)
-
     context = {
         "portfolio": portfolio,
         "assets": assets,
         "transactions": transactions,
         "performance": performance,
         "risks": risks,
-        "ai_insights": ai_insights,
-        "ai_risk_assessment": ai_risk_assessment,
-        "ai_market_trends": ai_market_trends,
     }
     return render(request, "portfolio_management/portfolio_detail.html", context)
 
@@ -452,3 +437,32 @@ def ai_investment_advice(request, portfolio_id):
     
     # If GET request, show the form
     return render(request, 'portfolio_management/ai_investment_advice_form.html', {'portfolio': portfolio})
+
+
+
+
+
+@login_required
+def get_ai_insights(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id, owner=request.user)
+    assets = portfolio.portfolio_assets.all()
+    risks = Risk.objects.filter(portfolios=portfolio)
+
+    portfolio_data = {
+        'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in assets],
+        'total_value': sum(asset.quantity * asset.asset.value for asset in assets),
+    }
+    
+    ai_insights = get_portfolio_insights(portfolio_data)
+    
+    risk_data = [{'name': risk.name, 'risk_type': risk.risk_type, 'description': risk.description} for risk in risks]
+    ai_risk_assessment = get_risk_assessment(risk_data)
+
+    asset_names = [asset.asset.name for asset in assets]
+    ai_market_trends = get_market_trends(asset_names)
+
+    return JsonResponse({
+        'ai_insights': ai_insights,
+        'ai_risk_assessment': ai_risk_assessment,
+        'ai_market_trends': ai_market_trends,
+    })
