@@ -12,6 +12,8 @@ from decimal import Decimal
 from risk_management.models import Risk
 from .gemini_ai import get_portfolio_insights, get_risk_assessment, get_market_trends, get_ai_investment_advice
 from django.http import JsonResponse
+from markdown2 import markdown
+from django.utils.safestring import mark_safe
 
 
 
@@ -407,11 +409,30 @@ def associate_risk_with_portfolio(request, portfolio_id):
 
 
 @login_required
+def get_ai_investment_advice_view(request, portfolio_id):
+    try:
+        portfolio = get_object_or_404(Portfolio, id=portfolio_id, owner=request.user)
+        
+        user_preferences = request.session.get('user_preferences', {})
+        portfolio_data = {
+            'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in portfolio.portfolio_assets.all()],
+            'total_value': sum(asset.quantity * asset.asset.value for asset in portfolio.portfolio_assets.all()),
+        }
+        
+        ai_advice = get_ai_investment_advice(user_preferences, portfolio_data)
+        ai_advice = markdown(ai_advice)
+        ai_advice = mark_safe(ai_advice)
+        
+        return JsonResponse({'ai_advice': ai_advice})
+    except Exception as e:
+        logger.error(f"Error generating AI investment advice: {str(e)}")
+        return JsonResponse({'error': 'Failed to generate AI investment advice'}, status=500)
+
+@login_required
 def ai_investment_advice(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, id=portfolio_id, owner=request.user)
     
     if request.method == 'POST':
-        # Process form data
         user_preferences = {
             'risk_tolerance': request.POST.get('risk_tolerance'),
             'investment_horizon': request.POST.get('investment_horizon'),
@@ -420,22 +441,14 @@ def ai_investment_advice(request, portfolio_id):
             'monthly_investment': request.POST.get('monthly_investment'),
             'esg_preference': request.POST.get('esg_preference') == 'on'
         }
-        
-        portfolio_data = {
-            'assets': [{'name': asset.asset.name, 'quantity': asset.quantity, 'value': asset.quantity * asset.asset.value} for asset in portfolio.portfolio_assets.all()],
-            'total_value': sum(asset.quantity * asset.asset.value for asset in portfolio.portfolio_assets.all()),
-        }
-        
-        ai_advice = get_ai_investment_advice(user_preferences, portfolio_data)
+        request.session['user_preferences'] = user_preferences
         
         context = {
             'portfolio': portfolio,
-            'ai_advice': ai_advice,
             'user_preferences': user_preferences
         }
         return render(request, 'portfolio_management/ai_investment_advice_result.html', context)
     
-    # If GET request, show the form
     return render(request, 'portfolio_management/ai_investment_advice_form.html', {'portfolio': portfolio})
 
 
@@ -461,6 +474,9 @@ def get_ai_insights(request, portfolio_id):
     asset_names = [asset.asset.name for asset in assets]
     ai_market_trends = get_market_trends(asset_names)
 
+    ai_insights = markdown(ai_insights)
+    ai_risk_assessment = markdown(ai_risk_assessment)
+    ai_market_trends = markdown(ai_market_trends)
     return JsonResponse({
         'ai_insights': ai_insights,
         'ai_risk_assessment': ai_risk_assessment,

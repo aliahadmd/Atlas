@@ -22,7 +22,10 @@ urlpatterns = [
     
     path('<int:portfolio_id>/performance/', views.portfolio_performance, name='portfolio_performance'),
     path('<int:portfolio_id>/associate-risk/', views.associate_risk_with_portfolio, name='associate_risk_with_portfolio'),
-    path('<int:portfolio_id>/ai-advice/', views.ai_investment_advice, name='ai_investment_advice'),
+    path('portfolio/<int:portfolio_id>/ai_investment_advice/', views.ai_investment_advice, name='ai_investment_advice'),
     path('<int:portfolio_id>/ai-insights/', views.get_ai_insights, name='get_ai_insights'),
+    path('<int:portfolio_id>/ai-advice/', views.ai_investment_advice, name='ai_investment_advice'),
+    path('<int:portfolio_id>/get-ai-advice/', views.get_ai_investment_advice_view, name='get_ai_investment_advice'),
+
      
 ]

@@ -1,15 +1,14 @@
 {% extends 'base/base.html' %}
-
 {% block title %}AI Investment Advice for {{ portfolio.name }}{% endblock %}
-
 {% block content %}
+
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-6">AI Investment Advice for {{ portfolio.name }}</h1>
 
     <div class="card bg-base-100 shadow-xl mb-8">
         <div class="card-body">
             <h2 class="card-title mb-4">Your Investment Preferences</h2>
-            <ul class="list-disc list-inside">
+            <ul>
                 <li>Risk Tolerance: {{ user_preferences.risk_tolerance }}</li>
                 <li>Investment Horizon: {{ user_preferences.investment_horizon }}</li>
                 <li>Investment Goals: {{ user_preferences.investment_goals }}</li>
@@ -23,8 +22,10 @@
     <div class="card bg-base-100 shadow-xl mb-8">
         <div class="card-body">
             <h2 class="card-title mb-4">AI Investment Advice</h2>
-            <div class="prose">
-                {{ ai_advice|linebreaks }}
+            <div id="ai-advice" class="prose">
+                <div class="loading">
+                    Loading AI investment advice...
+                </div>
             </div>
         </div>
     </div>
@@ -34,4 +35,25 @@
         <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-neutral">Back to Portfolio</a>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{% url "portfolio_management:get_ai_investment_advice" portfolio.id %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.ai_advice) {
+                document.getElementById('ai-advice').innerHTML = data.ai_advice;
+            } else {
+                throw new Error('No advice received');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('ai-advice').innerHTML = 'Failed to load AI investment advice. Please try again later.';
+        });
+});
+</script>
 {% endblock %}
