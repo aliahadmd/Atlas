@@ -77,13 +77,14 @@
                         <a href="{% url 'risk_list' %}"
                            class="{% if request.resolver_match.url_name == 'risk_list' %}active{% endif %}">Risks</a>
                     </li>
+                    
                     <li>
                         <a href="{% url 'portfolio_management:portfolio_list' %}"
-                           class="{% if request.resolver_match.url_name == 'portfolio_management:portfolio_list' %}active{% endif %}">Portfolio List</a>
+                           class="{% if request.resolver_match.url_name == 'portfolio_list' %}active{% endif %}">Portfolio List</a>
                     </li>
                     <li>
                         <a href="{% url 'portfolio_management:portfolio_create' %}"
-                           class="{% if request.resolver_match.url_name == 'portfolio_management:portfolio_create' %}active{% endif %}">Create Portfolio</a>
+                           class="{% if request.resolver_match.url_name == 'portfolio_create' %}active{% endif %}">Create Portfolio</a>
                     </li>
                     <li>
                         <a href="{% url 'risk_assessment_create' %}"

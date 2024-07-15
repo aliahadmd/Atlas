@@ -8,7 +8,7 @@
             <h2 class="card-title mb-4">Available Risks</h2>
             
             {% if available_risks %}
-                <form method="post" action="{% url 'associate_risk_with_portfolio' portfolio.id %}">
+                <form method="post" action="{% url 'portfolio_management:associate_risk_with_portfolio' portfolio.id %}">
                     {% csrf_token %}
                     <div class="form-control w-full max-w-xs mb-4">
                         <label for="risk_id" class="label">
@@ -32,7 +32,7 @@
     </div>
     
     <div class="mt-6">
-        <a href="{% url 'portfolio_detail' portfolio.id %}" class="btn btn-outline">Back to Portfolio</a>
+        <a href="{% url 'portfolio_management:portfolio_detail' portfolio.id %}" class="btn btn-outline">Back to Portfolio</a>
     </div>
 </div>
 {% endblock %}
