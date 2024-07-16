@@ -1,4 +1,4 @@
-# views.py
+# risk_management/views.py
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 
-class DashboardView(ListView):
+class DashboardView(LoginRequiredMixin, ListView):
     template_name = 'risk_management/dashboard.html'
     context_object_name = 'risks'
     model = Risk

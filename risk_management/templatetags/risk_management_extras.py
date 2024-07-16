@@ -20,6 +20,6 @@ def markdown_to_html(text):
     cleaned_html = bleach.clean(html, tags=allowed_tags, attributes=allowed_attributes)
     
     # Replace newlines with <br> tags to preserve line breaks
-    cleaned_html = cleaned_html.replace('\n', '<br>')
+
     
     return mark_safe(cleaned_html)
