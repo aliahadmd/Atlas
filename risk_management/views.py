@@ -3,45 +3,45 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
+from django.db.models import Count, Avg
+from django.http import JsonResponse
+from django.contrib import messages
 from .models import Asset, MonitoringHistory, Risk, RiskAssessment, Monitoring, AIAnalysis
 from .forms import AssetForm, MonitoringHistoryForm, RiskForm, RiskAssessmentForm, MonitoringForm
+from .ai_prompts import get_risk_analysis_prompt
 import google.generativeai as genai
 from django.conf import settings
 import logging
-from django.contrib import messages
 import re
-from django.db.models import Count, Avg
-from django.views.generic import TemplateView
-from django.http import JsonResponse
-from .ai_prompts import get_risk_analysis_prompt
-
 
 # Configure logging
 logger = logging.getLogger(__name__)
-
-
 
 class DashboardView(LoginRequiredMixin, ListView):
     template_name = 'risk_management/dashboard.html'
     context_object_name = 'risks'
     model = Risk
 
+    def get_queryset(self):
+        return Risk.objects.filter(portfolios__owner=self.request.user).distinct()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['assets'] = Asset.objects.all()
-        context['recent_assessments'] = RiskAssessment.objects.order_by('-assessment_date')[:5]
+        context['assets'] = Asset.objects.filter(portfolio_assets__portfolio__owner=self.request.user).distinct()
+        context['recent_assessments'] = RiskAssessment.objects.filter(assessor=self.request.user).order_by('-assessment_date')[:5]
         
         # Aggregate data for charts
-        risk_types = Risk.objects.values('risk_type').annotate(count=Count('id'))
+        risk_types = self.get_queryset().values('risk_type').annotate(count=Count('id'))
         context['risk_type_labels'] = [rt['risk_type'] for rt in risk_types]
         context['risk_type_data'] = [rt['count'] for rt in risk_types]
         
-        monitoring_status = Monitoring.objects.values('status').annotate(count=Count('id'))
+        monitoring_status = Monitoring.objects.filter(risk__portfolios__owner=self.request.user).values('status').annotate(count=Count('id'))
         context['monitoring_status_labels'] = [ms['status'] for ms in monitoring_status]
         context['monitoring_status_data'] = [ms['count'] for ms in monitoring_status]
         
-        avg_impact = Risk.objects.aggregate(Avg('impact'))['impact__avg']
+        avg_impact = self.get_queryset().aggregate(Avg('impact'))['impact__avg']
         context['avg_impact'] = round(avg_impact, 2) if avg_impact else 0
         
         return context
@@ -51,9 +51,15 @@ class AssetListView(LoginRequiredMixin, ListView):
     template_name = 'risk_management/asset_list.html'
     context_object_name = 'assets'
 
+    def get_queryset(self):
+        return Asset.objects.filter(portfolio_assets__portfolio__owner=self.request.user).distinct()
+
 class AssetDetailView(LoginRequiredMixin, DetailView):
     model = Asset
     template_name = 'risk_management/asset_detail.html'
+
+    def get_queryset(self):
+        return Asset.objects.filter(portfolio_assets__portfolio__owner=self.request.user)
 
 class AssetCreateView(LoginRequiredMixin, CreateView):
     model = Asset
@@ -66,15 +72,25 @@ class RiskListView(LoginRequiredMixin, ListView):
     template_name = 'risk_management/risk_list.html'
     context_object_name = 'risks'
 
+    def get_queryset(self):
+        return Risk.objects.filter(portfolios__owner=self.request.user).distinct()
+
 class RiskDetailView(LoginRequiredMixin, DetailView):
     model = Risk
     template_name = 'risk_management/risk_detail.html'
+
+    def get_queryset(self):
+        return Risk.objects.filter(portfolios__owner=self.request.user)
 
 class RiskCreateView(LoginRequiredMixin, CreateView):
     model = Risk
     form_class = RiskForm
     template_name = 'risk_management/risk_form.html'
     success_url = reverse_lazy('risk_list')
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
 
 class RiskAssessmentCreateView(LoginRequiredMixin, CreateView):
     model = RiskAssessment
@@ -86,11 +102,17 @@ class RiskAssessmentCreateView(LoginRequiredMixin, CreateView):
         form.instance.assessor = self.request.user
         return super().form_valid(form)
 
-
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 class AIAnalysisDetailView(LoginRequiredMixin, DetailView):
     model = AIAnalysis
     template_name = 'risk_management/ai_analysis_detail.html'
+
+    def get_queryset(self):
+        return AIAnalysis.objects.filter(risk_assessment__assessor=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -102,15 +124,10 @@ class AIAnalysisDetailView(LoginRequiredMixin, DetailView):
         ]
         return context
 
-
-
-
-
-
-
+@login_required
 def trigger_ai_analysis(request, risk_assessment_id):
     try:
-        risk_assessment = get_object_or_404(RiskAssessment, id=risk_assessment_id)
+        risk_assessment = get_object_or_404(RiskAssessment, id=risk_assessment_id, assessor=request.user)
         
         if not hasattr(settings, 'GEMINI_API_KEY'):
             raise ValueError("GEMINI_API_KEY is not set in settings")
@@ -198,16 +215,20 @@ def extract_sections(text):
     
     return sections
 
-
-
 class MonitoringListView(LoginRequiredMixin, ListView):
     model = Monitoring
     template_name = 'risk_management/monitoring_list.html'
     context_object_name = 'monitoring_entries'
 
+    def get_queryset(self):
+        return Monitoring.objects.filter(risk__portfolios__owner=self.request.user).distinct()
+
 class MonitoringDetailView(LoginRequiredMixin, DetailView):
     model = Monitoring
     template_name = 'risk_management/monitoring_detail.html'
+
+    def get_queryset(self):
+        return Monitoring.objects.filter(risk__portfolios__owner=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -224,11 +245,19 @@ class MonitoringCreateView(LoginRequiredMixin, CreateView):
         form.instance.monitor = self.request.user
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class MonitoringUpdateView(LoginRequiredMixin, UpdateView):
     model = Monitoring
     form_class = MonitoringForm
     template_name = 'risk_management/monitoring_form.html'
     success_url = reverse_lazy('monitoring_list')
+
+    def get_queryset(self):
+        return Monitoring.objects.filter(risk__portfolios__owner=self.request.user)
 
     def form_valid(self, form):
         old_status = self.get_object().status
@@ -246,8 +275,14 @@ class MonitoringUpdateView(LoginRequiredMixin, UpdateView):
 
         return response
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+@login_required
 def add_monitoring_history(request, pk):
-    monitoring = get_object_or_404(Monitoring, pk=pk)
+    monitoring = get_object_or_404(Monitoring, pk=pk, risk__portfolios__owner=request.user)
     if request.method == 'POST':
         form = MonitoringHistoryForm(request.POST)
         if form.is_valid():
@@ -267,15 +302,12 @@ def add_monitoring_history(request, pk):
     
     return render(request, 'risk_management/add_monitoring_history.html', {'form': form, 'monitoring': monitoring})
 
-
-
-
-class RiskHeatmapView(TemplateView):
+class RiskHeatmapView(LoginRequiredMixin, TemplateView):
     template_name = 'risk_management/risk_heatmap.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        risks = Risk.objects.all()
+        risks = Risk.objects.filter(portfolios__owner=self.request.user).distinct()
         risk_data = [
             {
                 'id': risk.id,
@@ -289,8 +321,9 @@ class RiskHeatmapView(TemplateView):
         context['risk_data'] = risk_data
         return context
 
+@login_required
 def risk_data_json(request):
-    risks = Risk.objects.all()
+    risks = Risk.objects.filter(portfolios__owner=request.user).distinct()
     risk_data = [
         {
             'id': risk.id,
@@ -302,5 +335,3 @@ def risk_data_json(request):
         for risk in risks
     ]
     return JsonResponse(risk_data, safe=False)
-
-
