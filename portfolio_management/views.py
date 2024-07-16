@@ -394,7 +394,7 @@ def associate_risk_with_portfolio(request, portfolio_id):
         portfolio.risks.add(risk)
         messages.success(request, f"Risk '{risk.name}' associated with portfolio '{portfolio.name}'.")
         
-        return redirect('portfolio_detail', portfolio_id=portfolio.id)
+        return redirect('portfolio_management:portfolio_detail', portfolio_id=portfolio.id)
     
     available_risks = Risk.objects.exclude(portfolios=portfolio)
     
