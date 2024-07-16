@@ -1,25 +1,16 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-            {% block title %}Atlas{% endblock %}
-        </title>
-        <link rel="stylesheet" href="{% static 'css/output.css' %}">
-        {% block extra_css %}{% endblock %}
-        <style>
-        .menu li > *:not(ul):not(.menu-title):not(details):active,
-        .menu li > *:not(ul):not(.menu-title):not(details).active,
-        .menu li > details > summary:active {
-            background-color: #000000;
-            color: #ffffff;
-        }
-        </style>
-        {% block extra_head %}{% endblock %}
-    </head>
-    <body class="drawer lg:drawer-open">
+{% extends 'base/home_base.html' %}
+{% block extra_css %}
+    <style>
+            .menu li > *:not(ul):not(.menu-title):not(details):active,
+            .menu li > *:not(ul):not(.menu-title):not(details).active,
+            .menu li > details > summary:active {
+                background-color: #000000;
+                color: #ffffff;
+            }
+    </style>
+{% endblock %}
+{% block homecontent %}
+    <div class="drawer lg:drawer-open">
         <input id="my-drawer" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
             <!-- Navbar -->
@@ -73,7 +64,6 @@
                         <a href="{% url 'portfolio_management:portfolio_list' %}"
                            class="{% if request.resolver_match.url_name == 'portfolio_list' %}active{% endif %}">Portfolio List</a>
                     </li>
-                    
                     <li>
                         <a href="{% url 'asset_list' %}"
                            class="{% if request.resolver_match.url_name == 'asset_list' %}active{% endif %}">Assets</a>
@@ -82,13 +72,10 @@
                         <a href="{% url 'risk_list' %}"
                            class="{% if request.resolver_match.url_name == 'risk_list' %}active{% endif %}">Risks</a>
                     </li>
-                    
-                    
                     <li>
                         <a href="{% url 'portfolio_management:portfolio_create' %}"
                            class="{% if request.resolver_match.url_name == 'portfolio_create' %}active{% endif %}">Create Portfolio</a>
                     </li>
-                    
                     <li>
                         <a href="{% url 'risk_assessment_create' %}"
                            class="{% if request.resolver_match.url_name == 'risk_assessment_create' %}active{% endif %}">New Assessment</a>
@@ -105,14 +92,17 @@
                         <a href="{% url 'risk_heatmap' %}"
                            class="{% if request.resolver_match.url_name == 'risk_heatmap' %}active{% endif %}">Risk Heatmap</a>
                     </li>
-                    
-                   
                 </ul>
                 <div class="p-4 mt-auto">
-                    <a href="{% url "dj-allauth-profile" %}" class="btn btn-outline btn-sm w-full">Go to Profile</a>
+                    <a href="{% url "dj-allauth-profile" %}"
+                       class="btn btn-outline btn-sm w-full">Go to Profile</a>
+                </div>
+                <div class="p-2 mt-auto">
+                    <a href="{% url "account_logout" %}"
+                       class="btn btn-outline btn-sm w-full">Logout</a>
                 </div>
             </aside>
         </div>
-        {% block extra_js %}{% endblock %}
-    </body>
-</html>
+    </div>
+{% endblock %}
+{% block extra_js %}{% endblock %}

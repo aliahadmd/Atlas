@@ -4,13 +4,15 @@ from django.views.static import serve
 from django.conf import settings
 from allauth.account.decorators import secure_admin_login
 from django.views.generic.base import TemplateView
+from django.views.generic import TemplateView
 
 
 admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)
 
 urlpatterns = [
-    path('', include('risk_management.urls')),
+    path('', TemplateView.as_view(template_name='homepage.html'), name='homepage'),
+    path('rm/', include('risk_management.urls')),
     path('pm/', include('portfolio_management.urls')),
     path('accounts/', include('allauth.urls')),
     path("accounts/profile/", TemplateView.as_view(template_name="profile.html"), name='dj-allauth-profile'),

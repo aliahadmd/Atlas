@@ -193,3 +193,9 @@ SITE_ID = 1
 
 
 USE_L10N = True
+
+
+
+LOGIN_REDIRECT_URL = 'portfolio_list' 
+
+ACCOUNT_LOGOUT_REDIRECT_URL = 'account_login'  
