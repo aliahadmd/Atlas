@@ -14,6 +14,7 @@ import re
 from django.db.models import Count, Avg
 from django.views.generic import TemplateView
 from django.http import JsonResponse
+from .ai_prompts import get_risk_analysis_prompt
 
 
 # Configure logging
@@ -105,50 +106,7 @@ class AIAnalysisDetailView(LoginRequiredMixin, DetailView):
 
 
 
-def extract_risk_score(text):
-    risk_score_match = re.search(r'risk.*?score.*?(\d+(\.\d+)?)', text, re.IGNORECASE)
-    if risk_score_match:
-        return float(risk_score_match.group(1))
-    return None
 
-def extract_sections(text):
-    sections = {
-        'Analysis': '',
-        'Recommendations': '',
-        'Scenarios': '',
-        'Key Indicators': ''
-    }
-    
-    # Try to find sections based on headers or content
-    current_section = 'Analysis'  # Default to Analysis if no headers found
-    lines = text.split('\n')
-    
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        
-        # Check if this line is a new section header
-        lower_line = line.lower()
-        if 'analysis' in lower_line or 'overview' in lower_line:
-            current_section = 'Analysis'
-        elif 'recommendation' in lower_line:
-            current_section = 'Recommendations'
-        elif 'scenario' in lower_line:
-            current_section = 'Scenarios'
-        elif 'key' in lower_line and ('indicator' in lower_line or 'kpi' in lower_line):
-            current_section = 'Key Indicators'
-        elif 'risk score' in lower_line:
-            continue  # Skip risk score line as it's handled separately
-        
-        # Add content to the current section
-        sections[current_section] += line + '\n'
-    
-    # Trim whitespace from each section
-    for key in sections:
-        sections[key] = sections[key].strip()
-    
-    return sections
 
 def trigger_ai_analysis(request, risk_assessment_id):
     try:
@@ -160,25 +118,7 @@ def trigger_ai_analysis(request, risk_assessment_id):
         model = genai.GenerativeModel('gemini-1.5-pro')
         
         associated_assets = ', '.join([asset.name for asset in risk_assessment.risk.assets.all()])
-        prompt = f"""
-        Analyze the following risk assessment:
-        Risk: {risk_assessment.risk.name}
-        Type: {risk_assessment.risk.risk_type}
-        Probability: {risk_assessment.risk.probability}
-        Impact: {risk_assessment.risk.impact}
-        Mitigation Strategy: {risk_assessment.mitigation_strategy}
-        Associated Assets: {associated_assets}
-
-        Provide a comprehensive risk analysis including:
-        1. A risk score between 0 and 1
-        2. Detailed analysis of the risk
-        3. Recommendations for managing the risk
-        4. Potential scenarios and their impacts
-        5. Key performance indicators (KPIs) to monitor this risk
-
-        Format your response with clear section headers for each part of the analysis.
-        Use markdown formatting for better readability.
-        """
+        prompt = get_risk_analysis_prompt(risk_assessment, associated_assets)
         
         response = model.generate_content(prompt)
         if not response.text:
@@ -191,16 +131,7 @@ def trigger_ai_analysis(request, risk_assessment_id):
             logger.warning(f"Risk score not found in AI response for risk assessment ID: {risk_assessment_id}")
             risk_score = 0.5  # Default to mid-range if not found
         
-        try:
-            sections = extract_sections(response.text)
-        except Exception as e:
-            logger.error(f"Error extracting sections: {str(e)}")
-            sections = {key: "Error extracting section" for key in ['Analysis', 'Recommendations', 'Scenarios', 'Key Indicators']}
-        
-        for key, value in sections.items():
-            if not value.strip():
-                sections[key] = f"No {key.lower()} provided in AI response."
-                logger.warning(f"Section '{key}' not found in AI response for risk assessment ID: {risk_assessment_id}")
+        sections = extract_sections(response.text)
         
         ai_analysis, created = AIAnalysis.objects.update_or_create(
             risk_assessment=risk_assessment,
@@ -220,15 +151,52 @@ def trigger_ai_analysis(request, risk_assessment_id):
         messages.success(request, "AI analysis completed successfully.")
         return redirect('ai_analysis_detail', pk=ai_analysis.pk)
     
-    except ValueError as ve:
-        logger.error(f"Value error in AI analysis: {str(ve)}")
-        messages.error(request, f"An error occurred during AI analysis: {str(ve)}")
     except Exception as e:
-        logger.error(f"Unexpected error in AI analysis: {str(e)}")
-        messages.error(request, "An unexpected error occurred during AI analysis. Please try again later.")
+        logger.error(f"Error in AI analysis: {str(e)}")
+        messages.error(request, f"An error occurred during AI analysis: {str(e)}")
     
     return redirect('dashboard')
 
+def extract_risk_score(text):
+    risk_score_match = re.search(r'risk.*?score.*?(\d+(\.\d+)?)', text, re.IGNORECASE)
+    if risk_score_match:
+        return float(risk_score_match.group(1))
+    return None
+
+def extract_sections(text):
+    sections = {
+        'Analysis': '',
+        'Recommendations': '',
+        'Scenarios': '',
+        'Key Indicators': ''
+    }
+    
+    current_section = 'Analysis'
+    lines = text.split('\n')
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        
+        lower_line = line.lower()
+        if 'analysis' in lower_line or 'overview' in lower_line:
+            current_section = 'Analysis'
+        elif 'recommendation' in lower_line:
+            current_section = 'Recommendations'
+        elif 'scenario' in lower_line:
+            current_section = 'Scenarios'
+        elif 'key' in lower_line and ('indicator' in lower_line or 'kpi' in lower_line):
+            current_section = 'Key Indicators'
+        elif 'risk score' in lower_line:
+            continue
+        
+        sections[current_section] += line + '\n'
+    
+    for key in sections:
+        sections[key] = sections[key].strip()
+    
+    return sections
 
 
 
