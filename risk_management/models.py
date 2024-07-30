@@ -7,7 +7,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=255)
     asset_type = models.CharField(max_length=100)
     value = models.DecimalField(max_digits=15, decimal_places=2)
-    portfolio_assets = models.ManyToManyField('portfolio_management.PortfolioAsset', related_name='risk_assets')
+    portfolio_assets = models.ManyToManyField('portfolio_management.PortfolioAsset', related_name='risk_assets', blank=True)
     
     def __str__(self):
         return self.name
