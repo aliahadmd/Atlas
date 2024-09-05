@@ -200,6 +200,6 @@ USE_L10N = True
 
 
 
-LOGIN_REDIRECT_URL = 'portfolio_list' 
+LOGIN_REDIRECT_URL = 'portfolio_create' 
 
 ACCOUNT_LOGOUT_REDIRECT_URL = 'account_login'  

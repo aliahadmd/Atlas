@@ -10,31 +10,32 @@ from datetime import timedelta
 User = get_user_model()
 
 class Command(BaseCommand):
-    help = 'Generates fake data for the portfolio management app'
+    help = 'Generates fake data for the portfolio management app for the admin user'
 
     def handle(self, *args, **kwargs):
         self.stdout.write('Generating fake data for portfolio management...')
 
-        # Create or get users
-        users = []
-        for i in range(10):
-            username = f'user_{i}'
-            user, created = User.objects.get_or_create(username=username, defaults={
-                'email': f'{username}@example.com',
-            })
-            if created:
-                user.set_password('password')
-                user.save()
-            users.append(user)
+        # Get or create the admin user
+        admin_user, created = User.objects.get_or_create(username='admin', defaults={
+            'email': 'admin@example.com',
+            'is_staff': True,
+            'is_superuser': True
+        })
+        if created:
+            admin_user.set_password('adminpassword')
+            admin_user.save()
+            self.stdout.write(self.style.SUCCESS('Created admin user'))
+        else:
+            self.stdout.write('Admin user already exists')
 
-        # Create portfolios
+        # Create portfolios for admin
         portfolios = []
-        for i in range(20):
+        for i in range(5):
             portfolio, created = Portfolio.objects.get_or_create(
-                name=f'Portfolio {i+1}',
+                name=f'Admin Portfolio {i+1}',
                 defaults={
-                    'description': f'Description for Portfolio {i+1}',
-                    'owner': random.choice(users)
+                    'description': f'Description for Admin Portfolio {i+1}',
+                    'owner': admin_user
                 }
             )
             portfolios.append(portfolio)
@@ -42,7 +43,7 @@ class Command(BaseCommand):
         # Create assets (assuming they don't exist yet)
         assets = []
         asset_types = ['Stock', 'Bond', 'ETF', 'Commodity', 'Cryptocurrency']
-        for i in range(50):
+        for i in range(20):
             asset, created = Asset.objects.get_or_create(
                 name=f'Asset {i+1}',
                 defaults={
@@ -54,7 +55,7 @@ class Command(BaseCommand):
 
         # Create portfolio assets
         for portfolio in portfolios:
-            for _ in range(random.randint(5, 15)):
+            for _ in range(random.randint(5, 10)):
                 PortfolioAsset.objects.get_or_create(
                     portfolio=portfolio,
                     asset=random.choice(assets),
@@ -81,7 +82,7 @@ class Command(BaseCommand):
 
         # Create transactions
         for portfolio in portfolios:
-            for _ in range(random.randint(10, 30)):
+            for _ in range(random.randint(10, 20)):
                 Transaction.objects.create(
                     portfolio=portfolio,
                     asset=random.choice(assets),
@@ -91,4 +92,4 @@ class Command(BaseCommand):
                     transaction_date=timezone.now() - timedelta(days=random.randint(1, 365))
                 )
 
-        self.stdout.write(self.style.SUCCESS('Successfully generated fake data for portfolio management'))
+        self.stdout.write(self.style.SUCCESS('Successfully generated fake data for admin user portfolio management'))
