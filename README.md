@@ -1,5 +1,6 @@
 ## login
 username: aliahadmd3
+<br>
 password: aliahadmd3
 
 ## License
@@ -10,7 +11,7 @@ This project is licensed under the Creative Commons Attribution-NonCommercial 4.
 
 # Atlas: AI-Powered Portfolio & Risk Management Platform 🌐💼🤖
 
-![Atlas Banner](https://via.placeholder.com/1200x300?text=Atlas:+AI-Powered+Portfolio+%26+Risk+Management)
+![Atlas Banner](./readme/atlas.png)
 
 Atlas is a cutting-edge portfolio and risk management system inspired by BlackRock's Aladdin, designed to revolutionize financial decision-making through advanced AI integration and comprehensive data analysis.
 
