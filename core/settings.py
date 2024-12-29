@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-qw%0s86$3zqbc6))i(79e7os@8dz6=82fyfbunma!jcne=u6*7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*.aliahad.com', '*.ahost.marscode.site', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -213,3 +213,27 @@ USE_L10N = True
 LOGIN_REDIRECT_URL = 'portfolio_create' 
 
 ACCOUNT_LOGOUT_REDIRECT_URL = 'account_login'  
+
+
+
+if not DEBUG:
+
+    # CSRF Settings
+    CSRF_TRUSTED_ORIGINS = ['https://*.ahost.marscode.site', 'https://*.aliahad.com']
+
+    # Security Settings - Simplified for initial deployment
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+
+    # Session and CSRF Settings
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+
+    SECURE_SSL_REDIRECT = True
+
+
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
