@@ -2649,3 +2649,22 @@ File /home/a/app/production/Atlas/venv/lib/python3.12/site-packages/django/contr
 (0.066) SELECT "django_session"."session_key", "django_session"."session_data", "django_session"."expire_date" FROM "django_session" WHERE ("django_session"."expire_date" > '2024-12-29T08:17:59.461877+00:00'::timestamptz AND "django_session"."session_key" = 'gas5w3l56f033pia547x161v073tgicm') LIMIT 21; args=(datetime.datetime(2024, 12, 29, 8, 17, 59, 461877, tzinfo=datetime.timezone.utc), 'gas5w3l56f033pia547x161v073tgicm'); alias=default
 "GET / HTTP/1.1" 200 2777
 "GET /static/css/output.css HTTP/1.1" 200 92301
+(0.155) 
+            SELECT
+                c.relname,
+                CASE
+                    WHEN c.relispartition THEN 'p'
+                    WHEN c.relkind IN ('m', 'v') THEN 'v'
+                    ELSE 't'
+                END,
+                obj_description(c.oid, 'pg_class')
+            FROM pg_catalog.pg_class c
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relkind IN ('f', 'm', 'p', 'r', 'v')
+                AND n.nspname NOT IN ('pg_catalog', 'pg_toast')
+                AND pg_catalog.pg_table_is_visible(c.oid)
+        ; args=None; alias=default
+(0.072) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations"; args=(); alias=default
+(0.081) SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."username" = 'a' LIMIT 21; args=('a',); alias=default
+(0.065) SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."username" = 'aliahadmd3' LIMIT 21; args=('aliahadmd3',); alias=default
+(0.080) INSERT INTO "auth_user" ("password", "last_login", "is_superuser", "username", "first_name", "last_name", "email", "is_staff", "is_active", "date_joined") VALUES ('pbkdf2_sha256$720000$fpnnw8PVoaOPwyjFWMPGMq$I/DCT7sIHOqpiLoPbm2cR4mjgMOh/A5/KJT55AIkkaQ=', NULL, true, 'aliahadmd3', '', '', 'aliahadmd3@gmail.com', true, true, '2024-12-29T08:29:54.967655+00:00'::timestamptz) RETURNING "auth_user"."id"; args=('pbkdf2_sha256$720000$fpnnw8PVoaOPwyjFWMPGMq$I/DCT7sIHOqpiLoPbm2cR4mjgMOh/A5/KJT55AIkkaQ=', None, True, 'aliahadmd3', '', '', 'aliahadmd3@gmail.com', True, True, datetime.datetime(2024, 12, 29, 8, 29, 54, 967655, tzinfo=datetime.timezone.utc)); alias=default
